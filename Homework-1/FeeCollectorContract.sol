@@ -1,5 +1,5 @@
-pragma solidity ^0.8.7;
 // SPDX-License-Identifier: MIT
+pragma solidity ^0.8.17;
 
 contract FeeCollector {    // 0x9bda01fffe72f21618d73dcdfddc2b9dabed2e9f
     address public owner;
