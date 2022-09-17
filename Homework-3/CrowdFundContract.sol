@@ -14,7 +14,7 @@ interface IERC20 {
 contract CrowdFund {
     event Launch(
         uint id,
-        address indexed creator,
+        address indexed creator, // we are putting indexed on to creator so that we can find all campaing that are lunched by the same crator.
         uint goal,
         uint32 startAt,
         uint32 endAt
@@ -53,17 +53,19 @@ contract CrowdFund {
         token = IERC20(_token);
     }
 
-    function launch(
+
+
+    function launch(  // create a new campaign which take 3 parameter which they are goal, start time and end time from creater.
         uint _goal,
         uint32 _startAt,
         uint32 _endAt
     ) external {
-        require(_startAt >= block.timestamp, "start at < now");
-        require(_endAt >= _startAt, "end at < start at");
-        require(_endAt <= block.timestamp + 90 days, "end at > max duration");
+        require(_startAt >= block.timestamp, "start at < now"); // campaign must be start at the future
+        require(_endAt >= _startAt, "end at < start at"); // end time must be after from start time
+        require(_endAt <= block.timestamp + 90 days, "end at > max duration (90 days)"); // campaign can stay just 90 day after it was created
 
         count += 1;
-        campaigns[count] = Campaign({
+        campaigns[count] = Campaign({ // create campaing with compaigns mapping
             creator: msg.sender,
             goal: _goal,
             pledged: 0,
@@ -72,13 +74,15 @@ contract CrowdFund {
             claimed: false
         });
 
-        emit Launch(count, msg.sender, _goal, _startAt, _endAt);
+        emit Launch(count, msg.sender, _goal, _startAt, _endAt); // emits that the campaign has created.
     }
+
+
 
     function cancel(uint _id) external {
         Campaign memory campaign = campaigns[_id];
-        require(campaign.creator == msg.sender, "not creator");
-        require(block.timestamp < campaign.startAt, "started");
+        require(campaign.creator == msg.sender, "not creator"); // to be sure she/he is the creator of the campaign.
+        require(block.timestamp < campaign.startAt, "started"); // creator just can cancel the campaign which is not started yet.
 
         delete campaigns[_id];
         emit Cancel(_id);
