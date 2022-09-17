@@ -1,16 +1,16 @@
 pragma solidity ^0.8.7;
 // SPDX-License-Identifier: MIT
 
-contract FeeCollector {
+contract FeeCollector {    // 0x9bda01fffe72f21618d73dcdfddc2b9dabed2e9f
     address public owner;
     uint256 public balance;
     
     constructor() {
-        owner = msg.sender;
+        owner = msg.sender;  // store information who deployed contract
     }
     
     receive() payable external {
-        balance += msg.value;
+        balance += msg.value; // keep track of balance (in WEI)
     }
     
     
@@ -18,7 +18,7 @@ contract FeeCollector {
         require(msg.sender == owner, "Only owner can withdraw");
         require(amount <= balance, "Insufficient funds");
         
-        destAddr.transfer(amount);
+        destAddr.transfer(amount); // send funds to given address
         balance -= amount;
     }
 }
