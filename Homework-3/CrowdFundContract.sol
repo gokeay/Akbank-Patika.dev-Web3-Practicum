@@ -106,7 +106,6 @@ contract CrowdFund {
         emit Pledge(_id, msg.sender, _amount);
     }
 
-    // function to unpledge
     function unpledge(uint _id, uint _amount) external {
         Campaign storage campaign = campaigns[_id];
         require(block.timestamp <= campaign.endAt, "ended");
