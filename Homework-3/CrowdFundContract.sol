@@ -12,9 +12,10 @@ interface IERC20 {
 }
 
 contract CrowdFund {
+    //we are putting indexed on to some of variables so that we can find all things that have common ozellik.
     event Launch(
         uint id,
-        address indexed creator, // we are putting indexed on to creator so that we can find all campaing that are lunched by the same crator.
+        address indexed creator, 
         uint goal,
         uint32 startAt,
         uint32 endAt
@@ -41,11 +42,14 @@ contract CrowdFund {
     }
 
     IERC20 public immutable token;
+
     // Total count of campaigns created.
     // It is also used to generate id for new campaigns.
     uint public count;
+
     // Mapping from id to Campaign
     mapping(uint => Campaign) public campaigns;
+
     // Mapping from campaign id => pledger => amount pledged
     mapping(uint => mapping(address => uint)) public pledgedAmount;
 
@@ -54,18 +58,19 @@ contract CrowdFund {
     }
 
 
-
-    function launch(  // create a new campaign which take 3 parameter which they are goal, start time and end time from creater.
+    // create a new campaign which take 3 parameter from creater: goal, start time and end time of the campaign.
+    function launch(
         uint _goal,
         uint32 _startAt,
         uint32 _endAt
     ) external {
         require(_startAt >= block.timestamp, "start at < now"); // campaign must be start at the future
         require(_endAt >= _startAt, "end at < start at"); // end time must be after from start time
-        require(_endAt <= block.timestamp + 90 days, "end at > max duration (90 days)"); // campaign can stay just 90 day after it was created
+        require(_endAt <= block.timestamp + 90 days, "end at > max duration (90 days)"); // campaign can live just 90 day after it was created
 
         count += 1;
-        campaigns[count] = Campaign({ // create campaing with compaigns mapping
+        // create campaing with `compaigns` mapping
+        campaigns[count] = Campaign({
             creator: msg.sender,
             goal: _goal,
             pledged: 0,
@@ -78,16 +83,17 @@ contract CrowdFund {
     }
 
 
-
+    // function for deleting the campaign which is not started yet
     function cancel(uint _id) external {
         Campaign memory campaign = campaigns[_id];
         require(campaign.creator == msg.sender, "not creator"); // to be sure she/he is the creator of the campaign.
-        require(block.timestamp < campaign.startAt, "started"); // creator just can cancel the campaign which is not started yet.
+        require(block.timestamp < campaign.startAt, "started"); // creator can only cancel the campaign which is not started yet.
 
         delete campaigns[_id];
         emit Cancel(_id);
     }
 
+    // function to pledge to a campaign we want
     function pledge(uint _id, uint _amount) external {
         Campaign storage campaign = campaigns[_id];
         require(block.timestamp >= campaign.startAt, "not started");
@@ -100,9 +106,13 @@ contract CrowdFund {
         emit Pledge(_id, msg.sender, _amount);
     }
 
+    // function to unpledge
     function unpledge(uint _id, uint _amount) external {
         Campaign storage campaign = campaigns[_id];
         require(block.timestamp <= campaign.endAt, "ended");
+
+        // we must sure there are enough token to take back.
+        require(pledgedAmount[_id][msg.sender] <= _amount, "insufficient amount of pledge");
 
         campaign.pledged -= _amount;
         pledgedAmount[_id][msg.sender] -= _amount;
@@ -111,6 +121,7 @@ contract CrowdFund {
         emit Unpledge(_id, msg.sender, _amount);
     }
 
+    // function to get tokens by owner if the campaign is completed 
     function claim(uint _id) external {
         Campaign storage campaign = campaigns[_id];
         require(campaign.creator == msg.sender, "not creator");
@@ -123,7 +134,7 @@ contract CrowdFund {
 
         emit Claim(_id);
     }
-
+    // function to get tokens back by sender if the campaign is not completed
     function refund(uint _id) external {
         Campaign memory campaign = campaigns[_id];
         require(block.timestamp > campaign.endAt, "not ended");
