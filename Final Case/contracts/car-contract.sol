@@ -62,10 +62,9 @@ contract car_production{
     }
 
     // Add car ,which create by user, to cars array
-    function addYourCar(string memory _brand, uint _price, bool _is_selling) public {
+    function addYourCar(string memory _brand, uint _price) public {
         cars.push(Car(_brand, _price, false));
         onSaleCars.push(cars[carId]);
-        isSelling[carId] = _is_selling;
         carToOwner[carId] = msg.sender;
         carId = carId.add(1);
         customerCarCount[msg.sender] = customerCarCount[msg.sender].add(1);
