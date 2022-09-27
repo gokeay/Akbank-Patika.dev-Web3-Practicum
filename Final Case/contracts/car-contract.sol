@@ -108,10 +108,5 @@ contract car_production{
         return cars.length; // Also can be use carId + 1
     }
 
-    // Check whether the car is selling or not by number.
-    // function isSelling(uint _Id) public view returns(bool) {
-    //     return isSelling[_Id];
-    // }      Instead this function can be use the isSelling function.
-
     // Liste yerine enumerableSet.uintSet
 }
