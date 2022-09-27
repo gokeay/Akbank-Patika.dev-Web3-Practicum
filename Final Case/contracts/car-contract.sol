@@ -29,7 +29,7 @@ contract car_production{
         uint newPrice
     );
 
-    event statusOfSale(uint carId, bool onSale);
+    event statusChanced(uint carId, bool onSale);
 
     // It is used to generate id for new cars.
     uint carId;
@@ -93,7 +93,7 @@ contract car_production{
         } else if (_is_on_sale == false) {
             delete onSaleCars[_Id];
         }
-        emit statusOfSale(_Id, _is_on_sale);
+        emit statusChanced(_Id, _is_on_sale);
     }
 
     // Change the car`s price.
