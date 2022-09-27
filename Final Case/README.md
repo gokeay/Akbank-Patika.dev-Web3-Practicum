@@ -1,5 +1,5 @@
 # Final project for Akbank Practicum by solidity. 🔗
-- In this project I created a car sales market onto blockchain. 👨‍💻
+- In this project I created a car sales market onto blockchain.
 
 - This contract allows that;
   
