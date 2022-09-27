@@ -66,6 +66,7 @@ contract car_production{
         cars.push(Car(_brand, _price, false));
         onSaleCars.push(cars[carId]);
         carToOwner[carId] = msg.sender;
+        isSelling[carId] = true;
         carId = carId.add(1);
         customerCarCount[msg.sender] = customerCarCount[msg.sender].add(1);
         emit carAdded(carId, msg.sender);
@@ -107,5 +108,5 @@ contract car_production{
         return cars.length; // Also can be use carId + 1
     }
 
-    // Liste yerine enumerableSet.uintSet
+    // Liste yerine front-end de kullanabilmek icin enumerableSet.uintSet
 }
