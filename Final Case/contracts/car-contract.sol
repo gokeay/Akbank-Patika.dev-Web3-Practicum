@@ -1,118 +1,117 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./ownable.sol";
+// import "./ownable.sol";
 import "./safemath.sol";
+// import "github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/utils/structs/EnumerableSet.sol";
 
-library CarHelper {
-
-    function changeName() public pure {
-
-    }
-
-    function putOnSale() public {
-
-    }
-
-    function changePrice() public {
-
-    }
-}
-
-contract car_production is Ownable{
+contract car_production{
 
     using SafeMath for uint256;
+    // using EnumerableSet for EnumerableSet.UintSet;
+    // EnumerableSet.UintSet private myUintSet;
 
     address ownerAddress;
 
-    event carAdded(
+    event carAdded(uint carId, address indexed owner);
+
+    event carSold(
         uint carId,
-        address indexed owner
+        address indexed newOwner,
+        address indexed previousOwner,
+        uint price
     );
-    
-    event pricaChanged(
+
+    event priceChanged(
         uint carId,
         address indexed owner,
+        uint previousPrice,
         uint newPrice
     );
 
+    event statusOfSale(uint carId, bool onSale);
+
+    // It is used to generate id for new cars.
     uint carId;
 
     struct Car {
-        string brand;
-        uint price;
-        bool is_second_hand;
-        bool is_selling;
+        string brand; // Brand of car
+        uint price; // Price of car
+        bool is_second_hand; // Status of car
     }
 
-    Car[] public on_sale_cars;
-    Car[] public cars;  
+    Car[] onSaleCars;
+    Car[] public cars;
+    // add(uintSet storage myUintSet, uint256 5);
 
+    // Mapping from car"s Id to owner address
     mapping(uint => address) public carToOwner;
-    mapping(address => uint) public customer_car_count;
+    // Mapping from owner address to amount of owner`s car
+    mapping(address => uint) public customerCarCount;
+    // Mapping from car`s Id to sales status of car
+    mapping(uint => bool) public isSelling;
 
     constructor() {
         ownerAddress = msg.sender;
     }
 
-    // checking for be sure it is owner
+    // Checking for being sure it is owner
     modifier _isOwner(uint _car_Id) {
         require(carToOwner[_car_Id] == msg.sender, "You are not the owner of this car!");
         _;
     }
 
-
-    function addYourCar(string memory _brand, uint _price) public {
-        //arabanin marka ve fiyatina bakarak daha once olusturulup olusturulmadigini kontrol eden bir require. 
-        carId += 1;
-        cars.push(Car(_brand, _price, false, false));
+    // Add car ,which create by user, to cars array
+    function addYourCar(string memory _brand, uint _price, bool _is_selling) public {
+        cars.push(Car(_brand, _price, false));
+        onSaleCars.push(cars[carId]);
+        isSelling[carId] = _is_selling;
         carToOwner[carId] = msg.sender;
-        customer_car_count[msg.sender] = customer_car_count[msg.sender].add(1);
+        carId = carId.add(1);
+        customerCarCount[msg.sender] = customerCarCount[msg.sender].add(1);
         emit carAdded(carId, msg.sender);
     }
 
-    function buy_car(uint _Id) public {
-        require(carToOwner[_Id] != msg.sender, "You are owner of car.");
-        require(cars[_Id].is_selling, "This car is not selling!");
-        customer_car_count[msg.sender] = customer_car_count[msg.sender].add(1);
-        customer_car_count[carToOwner[_Id]] = customer_car_count[carToOwner[_Id]].sub(1);
+    // Change the car`s owner by car`s Id
+    function buyCar(uint _Id) public {
+        require(carToOwner[_Id] != msg.sender, "You are already owner of this car.");
+        require(isSelling[_Id], "This car is not selling!");
+        cars[_Id].is_second_hand = true;  // After buying the car it is going to be second hand.
+        address previous_owner = carToOwner[_Id]; // For be able to emit the previous owner
         carToOwner[_Id] = msg.sender;
+        customerCarCount[msg.sender] = customerCarCount[msg.sender].add(1);
+        customerCarCount[previous_owner] = customerCarCount[previous_owner].sub(1);
+        emit carSold(_Id, msg.sender, previous_owner, cars[_Id].price);
     }
 
-    function putOnSell(uint _carId, bool _is_on_sale) public {
-        cars[_carId].is_selling = _is_on_sale;
+    // Change the sales status of car by car`s Id
+    function changeSalesStatus(uint _Id, bool _is_on_sale) _isOwner(_Id) public {
+        require(isSelling[_Id] != _is_on_sale, "Your car`s already like you want."); // To avoid the unnecessary gas consumption.
+        isSelling[_Id] = _is_on_sale;
         if (_is_on_sale == true) {
-            on_sale_cars.push(cars[_carId]);
+            onSaleCars.push(cars[_Id]);
+        } else if (_is_on_sale == false) {
+            delete onSaleCars[_Id];
         }
+    emit statusOfSale(_Id, _is_on_sale);
     }
 
-    function changePrice(uint _carId, uint newPrice) _isOwner(_carId) public {
-        cars[_carId].price = newPrice;
-        emit pricaChanged(_carId, msg.sender, newPrice);
+    // Change the car`s price.
+    function changePrice(uint _Id, uint _new_price) _isOwner(_Id) public {
+        uint previous_price = cars[_Id].price; // For be able to emit the previous price
+        cars[_Id].price = _new_price;
+        emit priceChanged(_Id, msg.sender, previous_price, _new_price);
     }
 
+    // Show how many cars exist.
     function carsCount() external view returns(uint) {
-        uint counter = 0;
-        for (uint i = 0; i < cars.length; i++) {
-            counter++;
-        }
-        return counter;
+        return cars.length; // Also can be use carId + 1
     }
 
-    function isSelling(uint _Id) public view returns(bool) {
-        return cars[_Id].is_selling;
-    }
+    // Check whether the car is selling or not by number.
+    // function isSelling(uint _Id) public view returns(bool) {
+    //     return isSelling[_Id];
+    // }      Instead this function can be use the isSelling function.
 
-    // function getCarsByOwner(address _owner) external view returns(uint[] memory) {
-    //     uint[] memory result = new uint[] (customer_car_count[_owner]);
-    //     uint counter = 0;
-    //     for (uint i = 0; i < cars.length; i++) {
-    //         if (carToOwner[i] == _owner) {
-    //             result[counter] = i;
-    //             counter++;
-    //         }
-    //     }
-    //     return result;
-    // }
-
+    // Liste yerine enumerableSet.uintSet
 }
