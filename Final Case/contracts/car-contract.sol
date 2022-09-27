@@ -92,7 +92,7 @@ contract car_production{
         } else if (_is_on_sale == false) {
             delete onSaleCars[_Id];
         }
-    emit statusOfSale(_Id, _is_on_sale);
+        emit statusOfSale(_Id, _is_on_sale);
     }
 
     // Change the car`s price.
