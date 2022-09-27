@@ -2,6 +2,7 @@
 - In this project I created a car sales market onto blockchain. 👨‍💻
 
 - This contract allows that;
+  
   ◉ adding your car onto car sales market with price you want, 🏎️🚗 ⚒️
   
   ◉ buying cars from car sale market depending on whether it's second hand, brand and price, 📈
