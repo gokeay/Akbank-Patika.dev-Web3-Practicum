@@ -7,7 +7,7 @@
   
   ◉ buying cars from car sale market depending on whether it's second hand condition, brand and price, 📈
   
-  ◉ changing your car's price and state of whether on sale. 📝
+  ◉ changing your car's price and state of whether on sale or not. 📝
   
   ◉ to see how many car are there in the market and another practical methods. 🚀
   
