@@ -63,7 +63,7 @@ contract car_production{
 
     // Add car ,which create by user, to cars array
     function addYourCar(string memory _brand, uint _price) public {
-        cars.push(Car(_brand, _price, false));
+        cars.push(Car(_brand, _price, false)); // This car created now so is_second_hand status set to false.
         onSaleCars.push(cars[carId]);
         carToOwner[carId] = msg.sender;
         isSelling[carId] = true;
